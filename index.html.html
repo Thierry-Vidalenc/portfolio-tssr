@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thierry VIDALENC | Dashboard TSSR & Terminal SysAdmin</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            sys: {
+              bg: '#090d16',
+              card: '#111827',
+              border: '#1f2937',
+              accent: '#10b981',
+              cyan: '#06b6d4',
+              alert: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Scrollbar personnalisée style console */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+    .terminal-glow {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+    }
+    .grid-bg {
+      background-size: 30px 30px;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="h-full grid-bg flex flex-col overflow-x-hidden antialiased text-sm">
+
+  <!-- TOP HEADER / SYSTEM NAVBAR -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 py-2.5 flex flex-wrap items-center justify-between gap-4">
+    <!-- Left Logo & Host Info -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-base">
+        <i class="fa-solid fa-server"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-mono font-bold text-slate-100 tracking-wide">node-vidalenc-tssr</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
+            SYSTEM ONLINE
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 font-mono">Debian GNU/Linux 12 (bookworm) • CIPECMA Saintes (17)</p>
+      </div>
+    </div>
+
+    <!-- Quick Status Badges -->
+    <div class="hidden md:flex items-center gap-6 font-mono text-xs">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-clock text-slate-500"></i>
+        <span class="text-slate-400">UPTIME:</span>
+        <span class="text-emerald-400 font-bold">18 ans (Depuis 2008)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-graduation-cap text-slate-500"></i>
+        <span class="text-slate-400">FORMATION:</span>
+        <span class="text-cyan-400 font-bold">TSSR (Niveau 5)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-location-dot text-slate-500"></i>
+        <span class="text-slate-400">SECTEUR:</span>
+        <span class="text-slate-200">Saintes & Dép. 17</span>
+      </div>
+    </div>
+
+    <!-- Actions / CTAs -->
+    <div class="flex items-center gap-2 ml-auto md:ml-0">
+      <button onclick="copyContactInfo()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium transition flex items-center gap-2 text-slate-200">
+        <i class="fa-regular fa-copy text-slate-400"></i>
+        <span class="hidden sm:inline">Contact Direct</span>
+      </button>
+      <a href="mailto:th.vidalenc@yahoo.com" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/20">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Recruter en Alternance</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (LAYOUT DUAL PANEL) -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- SIDEBAR NAVIGATION & SYSTEM METRICS -->
+    <aside class="w-full md:w-64 lg:w-72 bg-slate-900/60 border-r border-slate-800 flex flex-col shrink-0">
+      
+      <!-- User Profile Header -->
+      <div class="p-4 border-b border-slate-800/80 bg-slate-900/40">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-emerald-500/50 flex items-center justify-center font-mono text-emerald-400 font-bold text-lg">
+              TV
+            </div>
+            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
+          </div>
+          <div>
+            <h2 class="font-bold text-slate-100 leading-tight">Thierry VIDALENC</h2>
+            <p class="text-xs text-emerald-400 font-mono font-medium">Futur TSSR / Infra & Security</p>
+            <p class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-phone text-[9px] mr-1"></i>+33 7 67 72 76 78</p>
+          </div>
+        </div>
+
+        <!-- Quick Info Box -->
+        <div class="mt-3 p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 text-[11px] font-mono space-y-1">
+          <div class="flex justify-between text-slate-400">
+            <span>Contrat:</span>
+            <span class="text-amber-400 font-semibold">Alternance TSSR</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Rythme:</span>
+            <span class="text-slate-200">2 sem Ent. / 1 sem Ctr</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Début:</span>
+            <span class="text-cyan-400">Décembre 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-3 space-y-1 flex-1 overflow-y-auto font-medium text-xs">
+        <div class="px-3 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500">Modules de Gestion</div>
+        
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition text-slate-300 hover:bg-slate-800/60 hover:text-white">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-chart-line w-4 text-center text-emerald-400"></i>
+            <span>Vue d'ensemble / Metrics</span>
+          </div>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">SYS</span>
+        </button>
+
+        <button onclick="switchTab('cli')" id="nav-cli" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition text-slate-300 hover:bg-slate-800/60 hover:text-white">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-terminal w-4 text-center text-cyan-400"></i>
+            <span>Terminal CLI Debian</span>
+          </div>
+          <span class="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-1.5 py-0.5 rounded font-mono">Interactive</span>
+        </button>
+
+        <button onclick="switchTab('skills')" id="nav-skills" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition text-slate-300 hover:bg-slate-800/60 hover:text-white">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-sliders w-4 text-center text-purple-400"></i>
+            <span>Compétences Croisées</span>
+          </div>
+        </button>
+
+        <button onclick="switchTab('companies')" id="nav-companies" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition text-slate-300 hover:bg-slate-800/60 hover:text-white">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-building-user w-4 text-center text-amber-400"></i>
+            <span>Entreprises Cibles (Saintes)</span>
+          </div>
+          <span class="text-[10px] bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-mono">14 sites</span>
+        </button>
+
+        <button onclick="switchTab('letter')" id="nav-letter" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition text-slate-300 hover:bg-slate-800/60 hover:text-white">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-envelope-open-text w-4 text-center text-blue-400"></i>
+            <span>Lettre de Motivation</span>
+          </div>
+        </button>
+
+        <div class="pt-4 px-3 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500">Liens Utiles</div>
+        <a href="https://www.linkedin.com/in/thierry-vidalenc-9269a0445/" target="_blank" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800/40 hover:text-cyan-400 transition">
+          <i class="fa-brands fa-linkedin w-4 text-center text-blue-400"></i>
+          <span>Profil LinkedIn</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-auto"></i>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer Status -->
+      <div class="p-3 border-t border-slate-800 bg-slate-950/80 font-mono text-[11px] text-slate-500 space-y-1">
+        <div class="flex justify-between">
+          <span>Mem: 16GB ECC</span>
+          <span class="text-emerald-400">OK</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Storage: RAID 1 ZFS</span>
+          <span class="text-emerald-400">HEALTHY</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY AREA -->
+    <main class="flex-1 bg-slate-950/80 overflow-y-auto p-4 lg:p-6 space-y-6">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: DASHBOARD OVERVIEW                  -->
+      <!-- ========================================== -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        
+        <!-- Welcome Banner -->
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 border border-slate-800 p-6">
+          <div class="absolute -right-10 -bottom-10 text-slate-800/40 text-9xl font-mono select-none pointer-events-none">TSSR</div>
+          <div class="relative z-10 max-w-3xl space-y-3">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-medium">
+              <i class="fa-solid fa-check-circle"></i> Admis au CIPECMA Saintes — Titre Professionnel TSSR (Bac+2)
+            </div>
+            <h1 class="text-2xl lg:text-3xl font-bold tracking-tight text-white">
+              Candidature Alternance : Technicien Supérieur Systèmes & Réseaux
+            </h1>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Praticien autodidacte de l'environnement <span class="text-emerald-400 font-mono font-semibold">Linux Debian depuis 2008</span>, je combine une solide autonomie technique sur la gestion de serveurs et réseaux avec plus de 10 ans d'expérience terrain (relation client, rigueur logistique, conduite PL, gestion d'activité).
+            </p>
+            <div class="pt-2 flex flex-wrap gap-3">
+              <button onclick="switchTab('cli')" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-500/10">
+                <i class="fa-solid fa-terminal"></i>
+                <span>Lancer le Terminal CLI</span>
+              </button>
+              <button onclick="switchTab('letter')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-file-lines text-slate-400"></i>
+                <span>Consulter la Lettre Type</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Grid (KPI style Grafana) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Metric 1 -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-mono">EXPÉRIENCE LINUX</span>
+              <i class="fa-brands fa-linux text-emerald-400 text-lg"></i>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100">18 Ans</div>
+            <p class="text-xs text-slate-400 mt-1">Pratique Debian depuis v4 (Lenny - 2008)</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-emerald-400 h-full w-[95%]"></div>
+            </div>
+          </div>
+
+          <!-- Metric 2 -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-mono">SUPPORT & HELPDESK</span>
+              <i class="fa-solid fa-headset text-cyan-400 text-lg"></i>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100">Niveau 1 & 2</div>
+            <p class="text-xs text-slate-400 mt-1">Écoute, pédagogie & résolution</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-cyan-400 h-full w-[90%]"></div>
+            </div>
+          </div>
+
+          <!-- Metric 3 -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-mono">MOBILITÉ & PERMIS</span>
+              <i class="fa-solid fa-truck text-purple-400 text-lg"></i>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100">Permis B & C</div>
+            <p class="text-xs text-slate-400 mt-1">Autonome sur Saintes & Dép 17</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-purple-400 h-full w-[100%]"></div>
+            </div>
+          </div>
+
+          <!-- Metric 4 -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-mono">MATURITÉ PRO</span>
+              <i class="fa-solid fa-user-check text-amber-400 text-lg"></i>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100">10+ ans terrain</div>
+            <p class="text-xs text-slate-400 mt-1">Gestion d'activité & logistique</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-amber-400 h-full w-[100%]"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- System Skill Gauges & Architecture -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Skill Gauges Box -->
+          <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-emerald-400"></i>
+                <span>Charge de Compétences Techniques (Capacity Planning)</span>
+              </h3>
+              <span class="text-xs font-mono text-slate-400">TSSR Readiness</span>
+            </div>
+
+            <div class="space-y-3 font-mono text-xs">
+              <!-- Skill 1 -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300">Administration Linux Debian / CLI / BASH</span>
+                  <span class="text-emerald-400 font-bold">95%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full w-[95%]"></div>
+                </div>
+              </div>
+
+              <!-- Skill 2 -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300">Réseaux TCP/IP, Routage, VLAN, DNS / DHCP</span>
+                  <span class="text-cyan-400 font-bold">88%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div class="bg-gradient-to-r from-cyan-600 to-cyan-400 h-full w-[88%]"></div>
+                </div>
+              </div>
+
+              <!-- Skill 3 -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300">Windows Server & Active Directory (GPO, Users)</span>
+                  <span class="text-blue-400 font-bold">82%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-full w-[82%]"></div>
+                </div>
+              </div>
+
+              <!-- Skill 4 -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300">Virtualisation (VMware, Hyper-V, Docker basics)</span>
+                  <span class="text-purple-400 font-bold">80%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div class="bg-gradient-to-r from-purple-600 to-purple-400 h-full w-[80%]"></div>
+                </div>
+              </div>
+
+              <!-- Skill 5 -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300">Gestion de Parc & Support Helpdesk Utilisateurs</span>
+                  <span class="text-amber-400 font-bold">95%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full w-[95%]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Homelab Architecture & Personal Projects -->
+          <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-network-wired text-cyan-400"></i>
+                <span>Architecture du Homelab & Projets Autodidactes</span>
+              </h3>
+              <span class="text-xs font-mono text-slate-400">Pratique Réelle</span>
+            </div>
+
+            <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+              <p>
+                Depuis 2008, j'administre un environnement serveur domestique sous Debian. Ce banc d'essai permanent m'a permis d'acquérir une véritable autonomie système :
+              </p>
+
+              <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
+                <div class="p-2.5 rounded bg-slate-950 border border-slate-800/80">
+                  <span class="text-emerald-400 font-bold block mb-0.5"><i class="fa-solid fa-folder-tree mr-1"></i> Stockage & Partage</span>
+                  Samba, NFS, gestion stricte des droits POSIX, stratégies de backup.
+                </div>
+                <div class="p-2.5 rounded bg-slate-950 border border-slate-800/80">
+                  <span class="text-cyan-400 font-bold block mb-0.5"><i class="fa-solid fa-shield-halved mr-1"></i> Sécurité & VPN</span>
+                  SSH (clés/port knocking), Nginx Reverse Proxy, règles Iptables/UFW.
+                </div>
+                <div class="p-2.5 rounded bg-slate-950 border border-slate-800/80">
+                  <span class="text-purple-400 font-bold block mb-0.5"><i class="fa-solid fa-film mr-1"></i> Streaming & Flux</span>
+                  Serveurs multimédias, transcodage, gestion fine des bandes passantes.
+                </div>
+                <div class="p-2.5 rounded bg-slate-950 border border-slate-800/80">
+                  <span class="text-amber-400 font-bold block mb-0.5"><i class="fa-solid fa-route mr-1"></i> Addressing & DNS</span>
+                  IP Fixes, DHCP local, résolution DNS interne et routage.
+                </div>
+              </div>
+
+              <div class="p-3 rounded-lg bg-emerald-950/20 border border-emerald-800/40 text-emerald-300 flex items-start gap-2">
+                <i class="fa-solid fa-lightbulb mt-0.5 text-emerald-400"></i>
+                <span><strong>Objectif TSSR :</strong> Transposer cette passion et cette autonomie au profit des infrastructures d'entreprises (Active Directory, GLPI, VLANs, sauvegardes centralisées).</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: CLI TERMINAL INTERACTIVE             -->
+      <!-- ========================================== -->
+      <section id="tab-cli" class="tab-content hidden space-y-4">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2 font-mono">
+              <i class="fa-solid fa-terminal text-emerald-400"></i>
+              <span>Console Debian Terminal</span>
+            </h2>
+            <span class="text-xs text-slate-400 font-mono hidden sm:inline">(Tapez 'help' pour voir les commandes)</span>
+          </div>
+          <button onclick="clearTerminal()" class="text-xs font-mono px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            <i class="fa-solid fa-trash-can mr-1"></i> Effacer
+          </button>
+        </div>
+
+        <!-- Terminal Window Container -->
+        <div class="rounded-xl bg-slate-950 border border-slate-800 terminal-glow overflow-hidden font-mono text-xs flex flex-col h-[520px]">
+          
+          <!-- Terminal Titlebar -->
+          <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center justify-between text-slate-400 select-none">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              <span class="ml-2 text-[11px] text-slate-400">root@vidalenc-tssr:~# /bin/bash</span>
+            </div>
+            <div class="text-[10px] text-slate-500">Debian 12.5 LTS</div>
+          </div>
+
+          <!-- Terminal Output Area -->
+          <div id="terminal-output" class="p-4 flex-1 overflow-y-auto space-y-2 text-slate-200">
+            <div class="text-slate-400">Linux vidalenc-tssr 6.1.0-18-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.76-1 (2026) x86_64</div>
+            <div class="text-slate-400">Dernière connexion : <span id="term-date"></span> sur tty1</div>
+            <div class="p-2 rounded bg-slate-900/60 border border-slate-800 text-emerald-400 my-2">
+              Bienvenue sur la console interactive de <strong>Thierry VIDALENC</strong> (Candidat TSSR).<br>
+              Entrez <span class="text-amber-400 font-bold">help</span> pour afficher la liste des commandes disponibles.
+            </div>
+          </div>
+
+          <!-- Terminal Input Prompt -->
+          <div class="bg-slate-900/80 p-3 border-t border-slate-800 flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">thierry@vidalenc-tssr:~$</span>
+            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" placeholder="Tapez une commande (ex: help, cv, skills, status)..." class="flex-1 bg-transparent border-none outline-none text-slate-100 font-mono text-xs focus:ring-0">
+          </div>
+
+        </div>
+
+        <!-- Command Quick Buttons -->
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          <span class="text-slate-500 py-1">Raccourcis :</span>
+          <button onclick="runCommand('help')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">help</button>
+          <button onclick="runCommand('status')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">status</button>
+          <button onclick="runCommand('cv')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">cv</button>
+          <button onclick="runCommand('skills')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">skills</button>
+          <button onclick="runCommand('companies')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">companies</button>
+          <button onclick="runCommand('contact')" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300">contact</button>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: CROSS COMPETENCIES MATRIX           -->
+      <!-- ========================================== -->
+      <section id="tab-skills" class="tab-content hidden space-y-6">
+        
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-purple-400"></i>
+            <span>Matrice de Compétences Croisées (Technique & Terrain)</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Pourquoi le profil de Thierry VIDALENC est une valeur ajoutée immédiate pour votre équipe IT.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Pillar 1: Technical Skills -->
+          <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold">
+                <i class="fa-solid fa-server"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-100">1. Compétences Techniques IT (TSSR)</h3>
+                <p class="text-xs text-slate-400">Acquis pratiques & Formation CIPECMA</p>
+              </div>
+            </div>
+
+            <ul class="space-y-3 text-xs text-slate-300">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Administration Systèmes (Linux & Windows) :</strong>
+                  Maîtrise de Debian en ligne de commande (CLI). Gestion Active Directory, GPO, DNS, DHCP sous Windows Server.
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Infrastructures Réseaux & Sécurité :</strong>
+                  Modèle OSI, sous-réseaux IPv4, routage, segmentation VLAN, règles de pare-feu (Firewall), accès distant sécurisé (SSH, VPN).
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Virtualisation & Services réseau :</strong>
+                  Environnements VMware ESXi, Hyper-V, déploiement de conteneurs Docker, serveurs de fichiers Samba, Reverse Proxy Nginx.
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Support & Diagnostic Helpdesk :</strong>
+                  Assistance technique Niveau 1 et 2, gestion d'incidents, inventaire de parc informatique, rédaction de documentations techniques.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Pillar 2: Soft Skills & Operational Experience -->
+          <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
+                <i class="fa-solid fa-handshake"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-100">2. Savoir-Être & Maturité Pro (Terrain)</h3>
+                <p class="text-xs text-slate-400">Issues de 10+ ans d'expérience opérationnelle</p>
+              </div>
+            </div>
+
+            <ul class="space-y-3 text-xs text-slate-300">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Sens du Service & Relation Utilisateur :</strong>
+                  Ancien commerçant indépendant : capacité naturelle à écouter, comprendre les besoins des utilisateurs non-techniques et désamorcer les situations de stress.
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Rigueur Logistique & Organisation :</strong>
+                  Ancien Chauffeur-Livreur PL : culture du respect des procédures, gestion méthodique des flux, optimisation de tournées et fiabilité opérationnelle.
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Autonomie & Esprit de Résolution :</strong>
+                  Habitué à trouver des solutions pragmatiques rapidement tout en travaillant efficacement en équipe ou en autonomie complète.
+                </div>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+                <div>
+                  <strong class="text-white block">Polyvalence & Mobilité :</strong>
+                  Titulaire du Permis B et Permis C (Poids Lourds), disponible pour interventions sur site ou multisites sur le secteur de Saintes et Charente-Maritime.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: TARGET COMPANIES LIST (SAINTES)      -->
+      <!-- ========================================== -->
+      <section id="tab-companies" class="tab-content hidden space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-building-user text-amber-400"></i>
+              <span>Entreprises Cibles & Suivi des Candidatures (Secteur Saintes)</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Tableau de prospection stratégique d'alternance TSSR classé par priorité.
+            </p>
+          </div>
+
+          <!-- Priority Filter Buttons -->
+          <div class="flex items-center gap-1.5 font-mono text-xs">
+            <button onclick="filterCompanies('all')" class="filter-btn active px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">Toutes (14)</button>
+            <button onclick="filterCompanies('p1')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-900/50">P1 (Priorité Top)</button>
+            <button onclick="filterCompanies('p2')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-cyan-900/50">P2 (Grandes Ent.)</button>
+            <button onclick="filterCompanies('p3')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800">P3 (Prestataires)</button>
+          </div>
+        </div>
+
+        <!-- Companies Data Table -->
+        <div class="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/80 text-slate-400 font-mono text-[11px] uppercase border-b border-slate-800">
+                <tr>
+                  <th class="p-3.5">Prio</th>
+                  <th class="p-3.5">Structure / Entreprise</th>
+                  <th class="p-3.5">Type & Secteur</th>
+                  <th class="p-3.5">Canal de Candidature / Contact</th>
+                  <th class="p-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="companies-list" class="divide-y divide-slate-800 text-slate-300">
+                <!-- Rows injected dynamically by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 5: LETTER GENERATOR & CONTACT          -->
+      <!-- ========================================== -->
+      <section id="tab-letter" class="tab-content hidden space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open-text text-blue-400"></i>
+              <span>Lettre de Motivation Type (Alternance TSSR)</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Générez et adaptez la lettre de candidature pour votre structure en un clic.
+            </p>
+          </div>
+
+          <button onclick="copyLetterText()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/20">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copier la Lettre Complète</span>
+          </button>
+        </div>
+
+        <!-- Letter View Box -->
+        <div class="p-6 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs leading-relaxed space-y-4 font-sans max-w-4xl mx-auto shadow-2xl">
+          
+          <div class="flex justify-between items-start border-b border-slate-800 pb-4 font-mono text-[11px] text-slate-400">
+            <div>
+              <strong class="text-slate-100 block">Thierry VIDALENC</strong>
+              26 rue de Rétaud, 17100 Saintes<br>
+              Tél : +33 7 67 72 76 78 | th.vidalenc@yahoo.com
+            </div>
+            <div class="text-right">
+              <strong class="text-slate-100 block">[Nom de l’Entreprise Destinataire]</strong>
+              À l'attention du Responsable IT / DSI / RH<br>
+              Fait à Saintes, le <span id="letter-date">27 octobre 2026</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded bg-slate-950 border border-slate-800 font-mono text-[11px]">
+            <span class="text-emerald-400 font-bold">Objet :</span> Candidature pour un poste de Technicien Supérieur Systèmes et Réseaux (TSSR) en alternance<br>
+            <span class="text-slate-400">Rythme :</span> 2 semaines en entreprise / 1 semaine en centre (CIPECMA Saintes) | <span class="text-slate-400">Début :</span> Décembre 2026
+          </div>
+
+          <p>Madame, Monsieur,</p>
+
+          <p>
+            Mon attrait pour le domaine informatique s'appuie sur une pratique concrète et continue : passionné par la technique et utilisateur chevronné de Linux Debian depuis 2008, j'assure une veille constante sur les matériels, les réseaux et la sécurité informatique. Actuellement admis au CIPECMA de Saintes pour valider le Titre Professionnel de Technicien Supérieur Systèmes et Réseaux (TSSR - Niveau 5 / Bac+2), je recherche une entreprise d'accueil pour concrétiser mon alternance.
+          </p>
+
+          <p>
+            Rejoindre votre structure représente pour moi l'opportunité d'intégrer une équipe exigeante et de mettre immédiatement à votre service une double compétence éprouvée :
+          </p>
+
+          <ul class="list-disc pl-5 space-y-1 text-slate-300">
+            <li><strong>Une autonomie technique appliquée :</strong> Pratique quotidienne des lignes de commande (CLI), administration d'environnements Open Source (Debian), configuration de services (Samba, SSH, reverse proxy) et notions solides d'adressage IP, VLAN, DNS/DHCP et virtualisation.</li>
+            <li><strong>Une maturité professionnelle forte :</strong> Issu d'un parcours combinant la gestion d'activité et la relation client/usager, j'apporte un sens aigu de l'écoute, une excellente pédagogie pour le support utilisateurs (helpdesk) et une rigueur absolue dans le suivi des procédures.</li>
+          </ul>
+
+          <p>
+            Sérieux, réactif et animé par un fort esprit d'équipe, je serais ravi de vous rencontrer lors d'un entretien pour vous exposer plus de vive voix mon projet professionnel ainsi que l'implication que je souhaite apporter à vos équipes techniques.
+          </p>
+
+          <p>
+            Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+          </p>
+
+          <div class="pt-4 border-t border-slate-800 flex justify-between items-center font-mono text-[11px] text-slate-400">
+            <span>Thierry VIDALENC</span>
+            <span class="text-emerald-400"><i class="fa-solid fa-paperclip mr-1"></i> CV Joint</span>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FLOATING NOTIFICATION TOAST -->
+  <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-lg shadow-2xl flex items-center gap-2 text-xs">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">Action effectuée avec succès !</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ----------------------------------------------------
+    // DATA: TARGET COMPANIES IN SAINTES SECTOR
+    // ----------------------------------------------------
+    const companiesData = [
+      { prio: 'p1', name: 'Groupe Hospitalier de Saintonge', sector: 'Santé / Public', contact: 'emilie.bulteau@gh-saintesangely.fr', link: 'https://gh-saintesangely.nous-recrutons.fr/', note: 'Gros parc multi-site, haute disponibilité' },
+      { prio: 'p1', name: 'Coop Atlantique (Siège)', sector: 'Grande Distribution', contact: 'Portail Recrutement Talentview', link: 'https://coop-atlantique.talentview.io/', note: 'Siège à Saintes, réseau logistique étendu' },
+      { prio: 'p1', name: 'Horizon Informatique (Réseau Numérique)', sector: 'ESN / Infogérance', contact: 'contact@reseau-numerique.fr', link: 'mailto:contact@reseau-numerique.fr', note: 'Prestataire local direct (Rue des Fougères)' },
+      { prio: 'p1', name: 'Agglomération & Ville de Saintes', sector: 'Collectivité Public', contact: 'recrutement@ville-saintes.fr', link: 'mailto:recrutement@ville-saintes.fr', note: 'DSI gérant écoles et services municipaux' },
+      { prio: 'p2', name: 'Groupe Océalia / SICA Charentes', sector: 'Agro-industrie (Cognac)', contact: 'recrutement@ocealia-groupe.fr', link: 'mailto:recrutement@ocealia-groupe.fr', note: 'Infrastructures informatiques complexes' },
+      { prio: 'p2', name: 'ORIX Informatique (Groupe ADINFO)', sector: 'ESN / Prestataire', contact: 'Formulaire Groupe ADINFO', link: 'https://www.groupeadinfo.com/', note: 'Basé à Saintes, maintenance & serveurs' },
+      { prio: 'p2', name: 'Centre de Gestion FPT (CDG 17)', sector: 'Public Territorial', contact: 'Portail CDG 17', link: 'https://www.cdg17.fr/', note: 'Fonction publique basée à Saintes' },
+      { prio: 'p2', name: 'SPIE CityNetworks / SPIE ICS', sector: 'Telecoms & Infrastructures', contact: 'Portail SPIE Jobs', link: 'https://www.spie-job.com/', note: 'Réseaux télécoms et fibre entreprise' },
+      { prio: 'p3', name: 'Centre Ouest Informatique', sector: 'Prestataire IT Local', contact: 'contact@acropole-expert.com', link: 'mailto:contact@acropole-expert.com', note: 'Support et maintenance de proximité' },
+      { prio: 'p3', name: 'Novenci (Groupe NVL)', sector: 'ESN Régionale (Cognac)', contact: 'Portail Recrutement NVL', link: 'https://groupe.nvl.fr/recrutement', note: 'Spécialiste Cloud & Réseaux' },
+      { prio: 'p3', name: 'AVA6 (Agence Saintes/Royan)', sector: 'ESN / Cybersécurité', contact: 'Formulaire AVA6 Contact', link: 'https://www.avamed.fr/contact/', note: 'Infrastructure, réseau & sécurité' },
+      { prio: 'p3', name: 'Orange (Unité d\'Intervention)', sector: 'Opérateur Telecom', contact: 'Portail Orange Jobs', link: 'https://orange.jobs/', note: 'Support réseau et déploiements' }
+    ];
+
+    // ----------------------------------------------------
+    // TAB NAVIGATION SYSTEM
+    // ----------------------------------------------------
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      // Remove active class from nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-800', 'text-white');
+        btn.classList.add('text-slate-300');
+      });
+
+      // Show selected tab
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      if (targetTab) targetTab.classList.remove('hidden');
+
+      // Highlight current nav button
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('active', 'bg-slate-800', 'text-white');
+      }
+
+      // Scroll top
+      document.querySelector('main').scrollTop = 0;
+    }
+
+    // ----------------------------------------------------
+    // RENDER COMPANIES TABLE
+    // ----------------------------------------------------
+    function renderCompanies(filter = 'all') {
+      const tbody = document.getElementById('companies-list');
+      tbody.innerHTML = '';
+
+      const filtered = companiesData.filter(item => filter === 'all' || item.prio === filter);
+
+      filtered.forEach(c => {
+        let badgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
+        if (c.prio === 'p1') badgeColor = 'bg-emerald-950 text-emerald-400 border-emerald-800';
+        if (c.prio === 'p2') badgeColor = 'bg-cyan-950 text-cyan-400 border-cyan-800';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/50 transition border-b border-slate-800/60';
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${c.prio.toUpperCase()}</span>
+          </td>
+          <td class="p-3.5">
+            <strong class="text-white block">${c.name}</strong>
+            <span class="text-[11px] text-slate-400">${c.note}</span>
+          </td>
+          <td class="p-3.5 text-slate-400">${c.sector}</td>
+          <td class="p-3.5 font-mono text-cyan-400 text-[11px] truncate max-w-[200px]">${c.contact}</td>
+          <td class="p-3.5 text-right">
+            <a href="${c.link}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 text-slate-200 text-[11px] font-mono transition">
+              <span>Postuler</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterCompanies(priority) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-slate-200'));
+      renderCompanies(priority);
+    }
+
+    // ----------------------------------------------------
+    // CLI TERMINAL LOGIC
+    // ----------------------------------------------------
+    const termOutput = document.getElementById('terminal-output');
+    const termInput = document.getElementById('terminal-input');
+
+    const commands = {
+      'help': `
+<span class="text-amber-400 font-bold">Commandes disponibles :</span>
+  <span class="text-emerald-400">help</span>        : Affiche ce menu d'aide
+  <span class="text-emerald-400">status</span>      : Statut de la candidature & formation CIPECMA
+  <span class="text-emerald-400">cv</span>          : Affiche le parcours synthétique de Thierry
+  <span class="text-emerald-400">skills</span>      : Affiche la pile technique (Debian, TCP/IP, AD, Virtualisation)
+  <span class="text-emerald-400">companies</span>   : Liste les principales entreprises cibles à Saintes
+  <span class="text-emerald-400">contact</span>     : Coordonnées directes (Téléphone, Email, LinkedIn)
+  <span class="text-emerald-400">ping</span>        : Teste la connectivité avec le secteur de Saintes
+  <span class="text-emerald-400">clear</span>       : Efface l'écran de la console
+`,
+      'status': `
+<span class="text-cyan-400 font-bold">[SYSTEM STATUS / ALTERNANCE TSSR]</span>
+• Candidat    : Thierry VIDALENC
+• Diplôme     : Titre Pro Technicien Supérieur Systèmes et Réseaux (Niveau 5 / Bac+2)
+• Organisme   : CIPECMA Saintes (17)
+• Rythme      : 2 semaines en entreprise / 1 semaine en centre
+• Démarrage   : Décembre 2026
+• Statut      : <span class="text-emerald-400 font-bold">DISPONIBLE POUR CONTRAT D'ALTERNANCE</span>
+`,
+      'cv': `
+<span class="text-amber-400 font-bold">[PARCOURS & PROFIL THIERRY VIDALENC]</span>
+• <span class="text-white">2008 - Présent</span> : Administrateur Systèmes Autodidacte (Debian CLI, Docker, Samba, Reverse Proxy)
+• <span class="text-white">2018 - 2020</span>   : Chauffeur-Livreur PL & Prospection (SAS Guy Gerrin) — Rigoureux & Organisé
+• <span class="text-white">2004 - 2012</span>   : Commerçant Indépendant — Sens aigu du service client & gestion d'activité
+• <span class="text-white">Permis</span>        : Permis B et Permis C (Poids Lourds)
+`,
+      'skills': `
+<span class="text-purple-400 font-bold">[STACK TECHNIQUE & CROISÉE]</span>
+[OS]          Linux Debian (18 ans de pratique CLI), Windows Server (AD, GPO, DNS, DHCP)
+[NETWORK]     TCP/IP, Routage, VLANs, Firewalls (IPTables/UFW), VPN, SSH
+[VIRTUAL]     VMware, Hyper-V, Docker (bases)
+[SUPPORT]     Helpdesk N1/N2, Résolution d'incidents, GLPI, Pédagogie utilisateurs
+[SOFT SKILLS] Écoute client, Rigueur logistique, Autonomie, Calme sous pression
+`,
+      'companies': `
+<span class="text-amber-400 font-bold">[CIBLES PRIORITAIRES - SAINTES]</span>
+1. Groupe Hospitalier de Saintonge (Grand parc, santé)
+2. Coop Atlantique (Siège social & Logistique)
+3. Horizon Informatique / Réseau Numérique (ESN Locale)
+4. Agglomération de Saintes (Collectivité publique)
+5. Groupe Océalia (Cognac) / ORIX Informatique
+`,
+      'contact': `
+<span class="text-emerald-400 font-bold">[COORDONNÉES DIRECTES]</span>
+• Téléphone : <span class="text-white">+33 7 67 72 76 78</span>
+• Email     : <span class="text-white">th.vidalenc@yahoo.com</span>
+• Adresse   : 26 rue de Rétaud, 17100 Saintes
+• LinkedIn  : https://www.linkedin.com/in/thierry-vidalenc-9269a0445/
+`,
+      'ping': `
+PING saintes.infra.local (17100.17.1) 56(84) bytes of data.
+64 bytes from saintes.infra.local: icmp_seq=1 ttl=64 time=0.42 ms
+64 bytes from saintes.infra.local: icmp_seq=2 ttl=64 time=0.38 ms
+64 bytes from saintes.infra.local: icmp_seq=3 ttl=64 time=0.45 ms
+--- saintes.infra.local ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2004ms
+rtt min/avg/max/mdev = 0.38/0.41/0.45/0.03 ms - <span class="text-emerald-400">EXCELLENT LATENCY</span>
+`
+    };
+
+    function runCommand(cmdText) {
+      const cleanCmd = cmdText.trim().toLowerCase();
+      
+      // Echo input command
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'mt-2';
+      cmdLine.innerHTML = `<span class="text-emerald-400 font-bold">thierry@vidalenc-tssr:~$</span> <span class="text-white">${escapeHtml(cmdText)}</span>`;
+      termOutput.appendChild(cmdLine);
+
+      if (cleanCmd === 'clear') {
+        termOutput.innerHTML = '';
+      } else if (commands[cleanCmd]) {
+        const resNode = document.createElement('div');
+        resNode.innerHTML = commands[cleanCmd];
+        termOutput.appendChild(resNode);
+      } else if (cleanCmd !== '') {
+        const errNode = document.createElement('div');
+        errNode.className = 'text-red-400';
+        errNode.innerHTML = `bash: commande introuvable: ${escapeHtml(cleanCmd)}. Tapez <span class="text-amber-400">help</span> pour la liste.`;
+        termOutput.appendChild(errNode);
+      }
+
+      // Scroll to bottom
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    termInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = termInput.value;
+        termInput.value = '';
+        runCommand(val);
+      }
+    });
+
+    function clearTerminal() {
+      termOutput.innerHTML = '';
+      runCommand('help');
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // ----------------------------------------------------
+    // UTILS: COPY TO CLIPBOARD & TOAST NOTIFICATION
+    // ----------------------------------------------------
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    function copyContactInfo() {
+      const text = "Thierry VIDALENC - Candidat TSSR - Tél: 07 67 72 76 78 - Email: th.vidalenc@yahoo.com - Saintes (17)";
+      copyTextToClipboard(text, "Coordonnées de Thierry VIDALENC copiées !");
+    }
+
+    function copyLetterText() {
+      const letterText = `Thierry VIDALENC
+26 rue de Rétaud, 17100 Saintes
++33 7 67 72 76 78 | th.vidalenc@yahoo.com
+
+Objet : Candidature pour un poste de Technicien Supérieur Systèmes et Réseaux (TSSR) en alternance
+Rythme : 2 semaines en entreprise / 1 semaine en centre (CIPECMA Saintes)
+
+Madame, Monsieur,
+
+Mon attrait pour le domaine informatique s'appuie sur une pratique concrète et continue : passionné par la technique et utilisateur chevronné de Linux Debian depuis 2008, j'assure une veille constante sur les matériels, les réseaux et la sécurité informatique. Actuellement admis au CIPECMA de Saintes pour valider le Titre Professionnel de Technicien Supérieur Systèmes et Réseaux (TSSR - Niveau 5 / Bac+2), je recherche une entreprise d'accueil pour concrétiser mon alternance.
+
+Rejoindre votre structure représente pour moi l'opportunité d'intégrer une équipe exigeante et de mettre immédiatement à votre service une double compétence éprouvée :
+1. Une autonomie technique appliquée (Debian CLI, Samba, SSH, reverse proxy, routage TCP/IP, VLAN, DNS/DHCP).
+2. Une maturité professionnelle forte (sens du service client, écoute utilisateur, rigueur logistique et procédures).
+
+Sérieux, réactif et animé par un fort esprit d'équipe, je serais ravi de vous rencontrer lors d'un entretien.
+
+Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+
+Thierry VIDALENC`;
+
+      copyTextToClipboard(letterText, "Lettre de motivation copiée dans le presse-papier !");
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast(successMsg));
+      } else {
+        // Fallback execution
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast(successMsg);
+        } catch (err) {
+          console.error('Erreur copie:', err);
+        }
+        document.body.removeChild(textArea);
+      }
+    }
+
+    // ----------------------------------------------------
+    // INITIALIZATION ON LOAD
+    // ----------------------------------------------------
+    window.onload = function() {
+      // Set Current Date in Terminal & Letter
+      const now = new Date();
+      document.getElementById('term-date').innerText = now.toLocaleString('fr-FR');
+      document.getElementById('letter-date').innerText = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      // Render default companies list
+      renderCompanies('all');
+    };
+  </script>
+</body>
+</html>
